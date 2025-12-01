@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"user-management/internal/models"
 	"user-management/internal/service"
 	"user-management/internal/storage"
 )
@@ -72,4 +73,27 @@ func main() {
 		log.Fatalf("Error getting user statistics: %v", err)
 	}
 	fmt.Printf("User Statistics: %+v\n", stats)
+
+	// DEMO INTERFACES Y POLIMORFISMO
+	fmt.Println("\n=== SISTEMA DE NOTIFICACIONES ===")
+
+	notificationService := service.NewNotificationService()
+
+	// Crear notificación
+	notification := &models.Notification{
+		UserID:  int(user1.ID),
+		Title:   "Bienvenido",
+		Message: "Gracias por registrarte",
+		Type:    "system",
+	}
+
+	// Demostrar polimorfismo
+	fmt.Printf("Canales disponibles: %v\n", notificationService.GetAvailableNotifiers())
+
+	err = notificationService.SendToAllChannels(notification, user1)
+	if err != nil {
+		log.Printf("Error enviando notificación: %v", err)
+	} else {
+		fmt.Println("Notificaciones enviadas a todos los canales")
+	}
 }
