@@ -1,16 +1,16 @@
 package services
 
-import "user-management/internal/domain/models"
+import "user-management/internal/domain/entities"
 
 type NotificationService struct {
-	notifiers []models.Notifier
+	notifiers []entities.Notifier
 }
 
 func NewNotificationService() *NotificationService {
 	return &NotificationService{
-		notifiers: []models.Notifier{
-			&models.EmailNotification{},
-			&models.SMSNotification{},
+		notifiers: []entities.Notifier{
+			&entities.EmailNotification{},
+			&entities.SMSNotification{},
 		},
 	}
 }

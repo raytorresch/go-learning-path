@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 	"user-management/internal/domain/repositories"
 )
 
 // MemoryUserRepository implementa UserRepository
 type MemoryUserRepository struct {
-	users  map[int]*models.User
+	users  map[int]*entities.User
 	mutex  sync.RWMutex
 	nextID int
 }
@@ -20,12 +20,12 @@ var _ repositories.UserRepository = (*MemoryUserRepository)(nil)
 
 func NewMemoryUserRepository() *MemoryUserRepository {
 	return &MemoryUserRepository{
-		users:  make(map[int]*models.User),
+		users:  make(map[int]*entities.User),
 		nextID: 1,
 	}
 }
 
-func (r *MemoryUserRepository) Save(user *models.User) (*models.User, error) {
+func (r *MemoryUserRepository) Save(user *entities.User) (*entities.User, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -39,7 +39,7 @@ func (r *MemoryUserRepository) Save(user *models.User) (*models.User, error) {
 	return user, nil
 }
 
-func (r *MemoryUserRepository) FindByID(id int) (*models.User, error) {
+func (r *MemoryUserRepository) FindByID(id int) (*entities.User, error) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
@@ -51,11 +51,11 @@ func (r *MemoryUserRepository) FindByID(id int) (*models.User, error) {
 	return user, nil
 }
 
-func (r *MemoryUserRepository) FindAll() ([]*models.User, error) {
+func (r *MemoryUserRepository) FindAll() ([]*entities.User, error) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	users := make([]*models.User, 0, len(r.users))
+	users := make([]*entities.User, 0, len(r.users))
 	for _, user := range r.users {
 		users = append(users, user)
 	}
@@ -63,7 +63,7 @@ func (r *MemoryUserRepository) FindAll() ([]*models.User, error) {
 	return users, nil
 }
 
-func (r *MemoryUserRepository) Update(user *models.User) (*models.User, error) {
+func (r *MemoryUserRepository) Update(user *entities.User) (*entities.User, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 

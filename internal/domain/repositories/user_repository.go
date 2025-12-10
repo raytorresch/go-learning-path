@@ -1,31 +1,31 @@
 package repositories
 
 import (
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 )
 
 type UserRepository interface {
-	Save(user *models.User) (*models.User, error)
-	FindByID(id int) (*models.User, error)
-	FindAll() ([]*models.User, error)
-	Update(user *models.User) (*models.User, error)
+	Save(user *entities.User) (*entities.User, error)
+	FindByID(id int) (*entities.User, error)
+	FindAll() ([]*entities.User, error)
+	Update(user *entities.User) (*entities.User, error)
 	Delete(id int) error
 }
 
 // type UserRepository struct {
-// 	users  map[int]*models.User
+// 	users  map[int]*entities.User
 // 	mutex  sync.RWMutex
 // 	nextID int
 // }
 
 // func NewUserRepository() *UserRepository {
 // 	return &UserRepository{
-// 		users:  make(map[int]*models.User),
+// 		users:  make(map[int]*entities.User),
 // 		nextID: 1,
 // 	}
 // }
 
-// func (r *UserRepository) Create(user *models.User) (*models.User, error) {
+// func (r *UserRepository) Create(user *entities.User) (*entities.User, error) {
 // 	if err := user.Validate(); err != nil {
 // 		return nil, fmt.Errorf("fail validation: %w", err)
 // 	}
@@ -43,7 +43,7 @@ type UserRepository interface {
 // 	return user, nil
 // }
 
-// func (r *UserRepository) FindById(id int64) (*models.User, error) {
+// func (r *UserRepository) FindById(id int64) (*entities.User, error) {
 // 	r.mutex.RLock()
 // 	defer r.mutex.RUnlock()
 
@@ -55,11 +55,11 @@ type UserRepository interface {
 // 	return user, nil
 // }
 
-// func (r *UserRepository) FindAll() ([]*models.User, error) {
+// func (r *UserRepository) FindAll() ([]*entities.User, error) {
 // 	r.mutex.RLock()
 // 	defer r.mutex.RUnlock()
 
-// 	users := make([]*models.User, 0, len(r.users))
+// 	users := make([]*entities.User, 0, len(r.users))
 // 	for _, user := range r.users {
 // 		users = append(users, user)
 // 	}
@@ -67,7 +67,7 @@ type UserRepository interface {
 // 	return users, nil
 // }
 
-// func (r *UserRepository) Update(id int64, name, email string, age int, active bool) (*models.User, error) {
+// func (r *UserRepository) Update(id int64, name, email string, age int, active bool) (*entities.User, error) {
 // 	r.mutex.Lock()
 // 	defer r.mutex.Unlock()
 

@@ -3,12 +3,12 @@ package storage
 import (
 	"fmt"
 	"sync"
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 	"user-management/internal/domain/repositories"
 )
 
 type MemoryTaskRespository struct {
-	tasks  map[int]*models.Task
+	tasks  map[int]*entities.Task
 	mutex  sync.RWMutex
 	nextID int
 }
@@ -17,12 +17,12 @@ var _ repositories.TaskRepository = (*MemoryTaskRespository)(nil)
 
 func NewMemoryTaskRepository() *MemoryTaskRespository {
 	return &MemoryTaskRespository{
-		tasks:  make(map[int]*models.Task),
+		tasks:  make(map[int]*entities.Task),
 		nextID: 1,
 	}
 }
 
-func (r *MemoryTaskRespository) Save(task *models.Task) (*models.Task, error) {
+func (r *MemoryTaskRespository) Save(task *entities.Task) (*entities.Task, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -32,10 +32,10 @@ func (r *MemoryTaskRespository) Save(task *models.Task) (*models.Task, error) {
 	return task, nil
 }
 
-func (r *MemoryTaskRespository) FindByUserID(userID int) ([]*models.Task, error) {
+func (r *MemoryTaskRespository) FindByUserID(userID int) ([]*entities.Task, error) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
-	var tasks []*models.Task
+	var tasks []*entities.Task
 	for _, task := range r.tasks {
 		if task.UserID == userID {
 			tasks = append(tasks, task)

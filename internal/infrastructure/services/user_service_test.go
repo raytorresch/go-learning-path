@@ -3,28 +3,28 @@ package services
 import (
 	"errors"
 	"testing"
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 )
 
 // Test doubles
 type mockUserRepo struct {
-	saveFunc func(*models.User) (*models.User, error)
-	findFunc func(int) (*models.User, error)
+	saveFunc func(*entities.User) (*entities.User, error)
+	findFunc func(int) (*entities.User, error)
 }
 
-func (m *mockUserRepo) Save(user *models.User) (*models.User, error) {
+func (m *mockUserRepo) Save(user *entities.User) (*entities.User, error) {
 	return m.saveFunc(user)
 }
 
-func (m *mockUserRepo) FindByID(id int) (*models.User, error) {
+func (m *mockUserRepo) FindByID(id int) (*entities.User, error) {
 	return m.findFunc(id)
 }
 
-func (m *mockUserRepo) FindAll() ([]*models.User, error) {
+func (m *mockUserRepo) FindAll() ([]*entities.User, error) {
 	return nil, nil
 }
 
-func (m *mockUserRepo) Update(user *models.User) (*models.User, error) {
+func (m *mockUserRepo) Update(user *entities.User) (*entities.User, error) {
 	return nil, nil
 }
 
@@ -49,7 +49,7 @@ func TestUserService_RegisterUser(t *testing.T) {
 			name: "registro exitoso",
 			setupMock: func() *mockUserRepo {
 				return &mockUserRepo{
-					saveFunc: func(user *models.User) (*models.User, error) {
+					saveFunc: func(user *entities.User) (*entities.User, error) {
 						user.ID = 1 // Simular ID asignado
 						return user, nil
 					},
@@ -62,7 +62,7 @@ func TestUserService_RegisterUser(t *testing.T) {
 			name: "error en repository",
 			setupMock: func() *mockUserRepo {
 				return &mockUserRepo{
-					saveFunc: func(user *models.User) (*models.User, error) {
+					saveFunc: func(user *entities.User) (*entities.User, error) {
 						return nil, errors.New("database error")
 					},
 				}
@@ -98,8 +98,8 @@ func TestUserService_RegisterUser(t *testing.T) {
 
 // func TestUserService_GetUserStats(t *testing.T) {
 //     mockRepo := &mockUserRepo{
-//         findFunc: func(id int) (*models.User, error) {
-//             return &models.User{ID: int64(id), Active: true}, nil
+//         findFunc: func(id int) (*entities.User, error) {
+//             return &entities.User{ID: int64(id), Active: true}, nil
 //         },
 //     }
 

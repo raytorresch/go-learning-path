@@ -3,12 +3,12 @@ package repositories
 import (
 	"fmt"
 	"testing"
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 )
 
 // MockUserRepository para testing
 type MockUserRepository struct {
-	users       map[int]*models.User
+	users       map[int]*entities.User
 	saveError   error
 	deleteError error
 }
@@ -23,8 +23,8 @@ func (m *MockUserRepository) Delete(id int) error {
 }
 
 // FindAll implements UserRepository.
-func (m *MockUserRepository) FindAll() ([]*models.User, error) {
-	users := make([]*models.User, 0, len(m.users))
+func (m *MockUserRepository) FindAll() ([]*entities.User, error) {
+	users := make([]*entities.User, 0, len(m.users))
 	for _, user := range m.users {
 		users = append(users, user)
 	}
@@ -32,7 +32,7 @@ func (m *MockUserRepository) FindAll() ([]*models.User, error) {
 }
 
 // Update implements UserRepository.
-func (m *MockUserRepository) Update(user *models.User) (*models.User, error) {
+func (m *MockUserRepository) Update(user *entities.User) (*entities.User, error) {
 	if _, exists := m.users[int(user.ID)]; !exists {
 		return nil, fmt.Errorf("not found")
 	}
@@ -40,7 +40,7 @@ func (m *MockUserRepository) Update(user *models.User) (*models.User, error) {
 	return user, nil
 }
 
-func (m *MockUserRepository) Save(user *models.User) (*models.User, error) {
+func (m *MockUserRepository) Save(user *entities.User) (*entities.User, error) {
 	if m.saveError != nil {
 		return nil, m.saveError
 	}
@@ -48,7 +48,7 @@ func (m *MockUserRepository) Save(user *models.User) (*models.User, error) {
 	return user, nil
 }
 
-func (m *MockUserRepository) FindByID(id int) (*models.User, error) {
+func (m *MockUserRepository) FindByID(id int) (*entities.User, error) {
 	user, exists := m.users[id]
 	if !exists {
 		return nil, fmt.Errorf("not found")
@@ -63,10 +63,10 @@ func TestUserRepositoryInterface(t *testing.T) {
 	var _ UserRepository = (*MockUserRepository)(nil)
 
 	mockRepo := &MockUserRepository{
-		users: make(map[int]*models.User),
+		users: make(map[int]*entities.User),
 	}
 
-	user := models.NewUser("Test", "test@test.com", 30, true)
+	user := entities.NewUser("Test", "test@test.com", 30, true)
 
 	// Test Save
 	saved, err := mockRepo.Save(user)

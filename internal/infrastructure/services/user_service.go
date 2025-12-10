@@ -1,7 +1,7 @@
 package services
 
 import (
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 	"user-management/internal/domain/repositories"
 )
 
@@ -20,7 +20,7 @@ func NewUserService(
 	}
 }
 
-func (s *UserService) RegisterUser(name, email string, age int) (*models.User, error) {
-	user := models.NewUser(name, email, age, true)
+func (s *UserService) RegisterUser(name, email string, age int) (*entities.User, error) {
+	user := entities.NewUser(name, email, age, true)
 	return s.userRepo.Save(user)
 }
