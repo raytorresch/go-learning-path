@@ -1,9 +1,9 @@
-package storage
+package repositories
 
 import (
 	"sync"
 	"time"
-	"user-management/internal/models"
+	"user-management/internal/domain/models"
 )
 
 type NotificationRepository struct {

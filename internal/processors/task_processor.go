@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"user-management/internal/models"
+	"user-management/internal/domain/models"
 )
 
 // Type aliases para funciones (first-class citizens)
