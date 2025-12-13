@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"sync"
 	"time"
 	"user-management/internal/domain/entities"
+	"user-management/internal/infrastructure/monitoring"
 	"user-management/internal/infrastructure/services"
 	"user-management/internal/infrastructure/storage"
 )
@@ -23,11 +27,14 @@ func main() {
 	fmt.Printf("Usuario creado: %s\n", user.Name)
 	fmt.Printf("Email: %s\n", user.Email())
 
-	// Demonstrar concurrencia
-	demonstrateConcurrency()
+	//concurrencia
+	concurrency()
+
+	//concurrencia avanzada
+	advancedConcurrency()
 }
 
-func demonstrateConcurrency() {
+func concurrency() {
 	fmt.Println("\n=== DEMOSTRACIÓN DE CONCURRENCIA ===")
 
 	// 1. Repository con channels
@@ -47,7 +54,7 @@ func demonstrateConcurrency() {
 	results := orderService.ProcessBatch(orders)
 
 	elapsed := time.Since(start)
-	fmt.Printf("✅ Tiempo total: %v (sería ~500ms secuencial)\n", elapsed)
+	fmt.Printf("Tiempo total: %v (sería ~500ms secuencial)\n", elapsed)
 
 	// 5. Mostrar resultados
 	for _, order := range results {
@@ -78,7 +85,7 @@ func demonstrateConcurrency() {
 	// Consumir resultados
 	resultChan := orderService.StreamOrders(orderChan)
 	for order := range resultChan {
-		fmt.Printf("📦 Pedido procesado: User %d - Total: $%.2f\n",
+		fmt.Printf("Pedido procesado: User %d - Total: $%.2f\n",
 			order.UserID, order.Total)
 	}
 }
@@ -96,4 +103,70 @@ func createSampleOrders() []*entities.Order {
 		orders = append(orders, order)
 	}
 	return orders
+}
+
+func advancedConcurrency() {
+	fmt.Println("\n=== PATRONES AVANZADOS DE CONCURRENCIA ===")
+
+	// 1. Context con timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	// 2. Crear monitor
+	monitor := monitoring.NewOrderMonitor(ctx)
+	monitor.Start()
+
+	// 3. Crear servicio de notificaciones
+	notifService := monitoring.NewNotificationService(monitor)
+
+	// 4. Iniciar workers en background
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		if err := notifService.StartWorkers(ctx); err != nil {
+			log.Printf("Error en workers: %v", err)
+		}
+	}()
+
+	// 5. Simular eventos
+	fmt.Println("Simulando eventos de pedidos...")
+
+	for i := 1; i <= 10; i++ {
+		event := monitoring.OrderEvent{
+			OrderID:   i,
+			UserID:    i % 3,
+			EventType: "created",
+			Timestamp: time.Now(),
+		}
+
+		// Publicar con timeout individual
+		_, cancelEvent := context.WithTimeout(ctx, time.Second)
+		go func(e monitoring.OrderEvent) {
+			defer cancelEvent()
+			if err := monitor.PublishEvent(e); err != nil {
+				log.Printf("Error publicando evento %d: %v", e.OrderID, err)
+			}
+		}(event)
+
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	// 6. Esperar y limpiar
+	fmt.Println("\nEsperando finalización...")
+
+	// Dar tiempo para procesar
+	time.Sleep(2 * time.Second)
+
+	// Detener monitor ordenadamente
+	monitor.Stop()
+
+	// Cancelar context principal
+	cancel()
+
+	// Esperar workers
+	wg.Wait()
+
+	fmt.Println("Demostración completada")
 }
