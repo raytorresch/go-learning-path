@@ -1,4 +1,4 @@
-package models
+package entities
 
 import "time"
 
@@ -6,6 +6,8 @@ import "time"
 type Notification struct {
 	ID        int       `json:"id"`
 	UserID    int       `json:"user_id"`
+	Email     string    `json:"email"`
+	Phone     string    `json:"phone"`
 	Title     string    `json:"title"`
 	Message   string    `json:"message"`
 	Type      string    `json:"type"`

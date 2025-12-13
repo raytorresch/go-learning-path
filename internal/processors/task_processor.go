@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 )
 
 // Type aliases para funciones (first-class citizens)
-type TaskHandler func(task *models.Task) error
-type TaskFilter func(task *models.Task) bool
+type TaskHandler func(task *entities.Task) error
+type TaskFilter func(task *entities.Task) bool
 
 // TaskProcessor demuestra control de flujo avanzado
 type TaskProcessor struct {
@@ -28,7 +28,7 @@ func (p *TaskProcessor) RegisterHandler(taskType string, handler TaskHandler) {
 }
 
 // ProcessBatch demuestra funciones variádicas
-func (p *TaskProcessor) ProcessBatch(tasks ...*models.Task) (int, int) {
+func (p *TaskProcessor) ProcessBatch(tasks ...*entities.Task) (int, int) {
 	completed := 0
 	failed := 0
 
@@ -51,12 +51,12 @@ func (p *TaskProcessor) ProcessBatch(tasks ...*models.Task) (int, int) {
 }
 
 // ProcessTask con defer, panic y recover
-func (p *TaskProcessor) ProcessTask(task *models.Task) (err error) {
+func (p *TaskProcessor) ProcessTask(task *entities.Task) (err error) {
 	// Defer para manejo de panic
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("panic recuperado: %v", r)
-			task.Status = models.StatusFailed
+			task.Status = entities.StatusFailed
 		}
 	}()
 
@@ -68,7 +68,7 @@ func (p *TaskProcessor) ProcessTask(task *models.Task) (err error) {
 		task.Priority = 3 // Valor por defecto usando fallthrough
 		fallthrough
 	default:
-		task.Status = models.StatusProcessing
+		task.Status = entities.StatusProcessing
 	}
 
 	// Closure para tiempo de procesamiento
@@ -90,13 +90,13 @@ func (p *TaskProcessor) ProcessTask(task *models.Task) (err error) {
 	}
 
 	// Handler por defecto
-	task.Status = models.StatusCompleted
+	task.Status = entities.StatusCompleted
 	return nil
 }
 
 // FilterTasks muestra funciones como parámetros
-func (p *TaskProcessor) FilterTasks(tasks []*models.Task, filter TaskFilter) []*models.Task {
-	var result []*models.Task
+func (p *TaskProcessor) FilterTasks(tasks []*entities.Task, filter TaskFilter) []*entities.Task {
+	var result []*entities.Task
 	for _, task := range tasks {
 		if filter(task) {
 			result = append(result, task)
@@ -107,7 +107,7 @@ func (p *TaskProcessor) FilterTasks(tasks []*models.Task, filter TaskFilter) []*
 
 // Crear filtros usando closures
 func CreatePriorityFilter(minPriority int) TaskFilter {
-	return func(task *models.Task) bool {
+	return func(task *entities.Task) bool {
 		return task.Priority >= minPriority
 	}
 }

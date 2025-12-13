@@ -2,13 +2,13 @@ package storage
 
 import (
 	"testing"
-	"user-management/internal/domain/models"
+	"user-management/internal/domain/entities"
 )
 
 func TestMemoryUserRepository_Save(t *testing.T) {
 	repo := NewMemoryUserRepository()
 
-	user := models.NewUser("Test User", "test@example.com", 25, true)
+	user := entities.NewUser("Test User", "test@example.com", 25, true)
 
 	// Primer guardado
 	saved, err := repo.Save(user)
@@ -46,7 +46,7 @@ func TestMemoryUserRepository_FindAll(t *testing.T) {
 	}
 
 	for _, u := range users {
-		user := models.NewUser(u.name, u.email, u.age, true)
+		user := entities.NewUser(u.name, u.email, u.age, true)
 		_, err := repo.Save(user)
 		if err != nil {
 			t.Fatalf("Save falló: %v", err)
@@ -70,14 +70,14 @@ func TestMemoryUserRepository_ConcurrentAccess(t *testing.T) {
 
 	// Goroutine 1
 	go func() {
-		user := models.NewUser("User1", "user1@test.com", 20, true)
+		user := entities.NewUser("User1", "user1@test.com", 20, true)
 		repo.Save(user)
 		done <- true
 	}()
 
 	// Goroutine 2
 	go func() {
-		user := models.NewUser("User2", "user2@test.com", 30, true)
+		user := entities.NewUser("User2", "user2@test.com", 30, true)
 		repo.Save(user)
 		done <- true
 	}()
