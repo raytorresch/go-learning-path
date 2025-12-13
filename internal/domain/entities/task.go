@@ -6,6 +6,7 @@ const (
 	StatusPending    TaskStatus = "pending"
 	StatusProcessing TaskStatus = "processing"
 	StatusCompleted  TaskStatus = "completed"
+	StatusCancelled  TaskStatus = "cancelled"
 	StatusFailed     TaskStatus = "failed"
 )
 
