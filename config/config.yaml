@@ -1,0 +1,12 @@
+server:
+  port: 8080
+  env: development
+  timeout: 30s
+
+database:
+  max_connections: 10
+  connection_string: ""
+
+logging:
+  level: "info"
+  format: "json"
