@@ -1,7 +1,11 @@
-#run
-run:
-	go run cmd/main.go
+.PHONY: test lint build
 
-#build ./bin/user-management
+test:
+    go test ./... -v -coverprofile=coverage.out
+    go tool cover -html=coverage.out -o coverage.html
+
+lint:
+    golangci-lint run ./... --timeout=5m
+
 build:
-	go build -o bin/user-management cmd/main.go
+    CGO_ENABLED=0 go build -o bin/api ./cmd/api

@@ -20,8 +20,8 @@ func NewUserService(
 	}
 }
 
-func (s *UserService) RegisterUser(name, email string, age int) (*entities.User, error) {
-	user := entities.NewUser(name, email, age, true)
+func (s *UserService) RegisterUser(name, email string, age int, password string) (*entities.User, error) {
+	user, _ := entities.NewUser(name, email, age, password)
 	return s.userRepo.Save(user)
 }
 

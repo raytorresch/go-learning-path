@@ -6,20 +6,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 
 	"user-management/internal/domain/entities"
-	"user-management/internal/infrastructure/services"
+	"user-management/internal/domain/ports/output"
 )
 
 type UserHandler struct {
-	userService *services.UserService
-	validate    *validator.Validate
+	userPort output.UserPort
+	validate *validator.Validate
 }
 
-func NewUserHandler(userService *services.UserService) *UserHandler {
+func NewUserHandler(userPort output.UserPort) *UserHandler {
 	return &UserHandler{
-		userService: userService,
-		validate:    validator.New(),
+		userPort: userPort,
+		validate: validator.New(),
 	}
 }
 
@@ -39,9 +40,10 @@ func (h *UserHandler) RegisterRoutes(router *gin.RouterGroup) {
 // CreateUser demuestra binding y validación
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req struct {
-		Name  string `json:"name" binding:"required,min=3"`
-		Email string `json:"email" binding:"required,email"`
-		Age   int    `json:"age" binding:"gte=0,lte=120"`
+		Name     string `json:"name" binding:"required,min=3"`
+		Email    string `json:"email" binding:"required,email"`
+		Age      int    `json:"age" binding:"gte=0,lte=120"`
+		Password string `json:"password" binding:"required,min=6"`
 	}
 
 	// Binding automático con Gin
@@ -56,11 +58,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.RegisterUser(req.Name, req.Email, req.Age)
-	if err != nil {
-		ErrorResponse(c, http.StatusInternalServerError, err)
-		return
-	}
+	user := h.userPort.Create(c.Request.Context(), req.Name, req.Email, req.Age, req.Password)
 
 	c.JSON(http.StatusCreated, Response{
 		Success: true,
@@ -72,13 +70,13 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // GetUserByID con parámetros de ruta
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		ErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 
-	user, err := h.userService.GetUserByID(id)
+	user, err := h.userPort.FindByID(c.Request.Context(), id)
 	if err != nil {
 		ErrorResponse(c, http.StatusNotFound, err)
 		return
@@ -98,7 +96,7 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	offset, _ := strconv.Atoi(offsetStr)
 
 	// Filtrar usuarios (simplificado)
-	users, _ := h.userService.GetAllUsers()
+	users, _ := h.userPort.GetAllUsers(c.Request.Context())
 
 	// Paginación básica
 	start := offset

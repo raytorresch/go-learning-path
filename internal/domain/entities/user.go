@@ -1,53 +1,60 @@
 package entities
 
 import (
+	"errors"
 	"fmt"
 	"time"
-	"user-management/pkg/utils"
+	"user-management/internal/domain/valueobjects"
+
+	"github.com/google/uuid"
+)
+
+var (
+	ErrInvalidEmail = errors.New("invalid email format")
+	ErrWeakPassword = errors.New("password too weak")
 )
 
 type User struct {
-	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	email     string    `json:"email"`
-	Age       int       `json:"age"`
-	Active    bool      `json:"active"`
-	createdAt time.Time `json:"created_at"`
-	updatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID                 `json:"id"`
+	Name      string                    `json:"name"`
+	Email     string                    `json:"email"`
+	Password  valueobjects.PasswordHash `json:"-"`
+	Age       int                       `json:"age"`
+	Active    bool                      `json:"active"`
+	CreatedAt time.Time                 `json:"created_at"`
+	UpdatedAt time.Time                 `json:"updated_at"`
 }
 
-func NewUser(name, email string, age int, active bool) *User {
-	return &User{
+func NewUser(name, email string, age int, password string) (usr *User, err error) {
+	emailVO, err := valueobjects.NewEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	passwordHash, err := valueobjects.NewPasswordHash(password)
+	if err != nil {
+		return nil, err
+	}
+	user := &User{
 		Name:      name,
-		email:     email,
+		Email:     emailVO.Value(),
+		Password:  passwordHash,
 		Age:       age,
-		Active:    active,
-		createdAt: time.Now(),
-		updatedAt: time.Now(),
+		Active:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
-}
 
-func (u *User) Email() string {
-	return u.email
-}
-
-func (u *User) SetEmail(email string) error {
-	if !utils.ValidateEmail(email) {
-		return fmt.Errorf("email inválido")
-	}
-	return nil
+	return user, nil
 }
 
 func (u *User) SetUpdatedAt(t time.Time) {
-	u.updatedAt = t
+	u.UpdatedAt = t
 }
 
 func (u *User) Validate() error {
 	if u.Name == "" {
 		return fmt.Errorf("name cannot be empty")
-	}
-	if u.email == "" {
-		return fmt.Errorf("email cannot be empty")
 	}
 	if u.Age < 0 || u.Age > 120 {
 		return fmt.Errorf("age must be between 0 and 120")
@@ -62,22 +69,19 @@ func (u *User) String() string {
 		status = "active"
 	}
 	return fmt.Sprintf("User[ID=%d, Name=%s, Email=%s, Age=%d, Status=%s, CreatedAt=%s, UpdatedAt=%s]",
-		u.ID, u.Name, u.email, u.Age, status, u.createdAt.Format(time.RFC3339), u.updatedAt.Format(time.RFC3339))
+		u.ID, u.Name, u.Email, u.Age, status, u.CreatedAt.Format(time.RFC3339), u.UpdatedAt.Format(time.RFC3339))
 }
 
 func (u *User) Update(name, email string, age int, active bool) error {
 	if name != "" {
 		u.Name = name
 	}
-	if email != "" {
-		u.email = email
-	}
 	if age >= 0 && age <= 120 {
 		u.Age = age
 	}
 	u.Active = active
 
-	u.updatedAt = time.Now()
+	u.UpdatedAt = time.Now()
 
 	return u.Validate()
 }

@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"user-management/internal/infrastructure/handlers"
+	"user-management/internal/infrastructure/http/handlers"
 	"user-management/internal/infrastructure/middlewares"
-	"user-management/internal/infrastructure/services"
-	"user-management/internal/infrastructure/storage"
+	"user-management/internal/infrastructure/persistence/memory"
+	// "user-management/internal/infrastructure/storage"
 )
 
 func main() {
@@ -19,11 +19,11 @@ func main() {
 	}
 
 	// Inicializar dependencias
-	userRepo := storage.NewMemoryUserRepository()
-	orderRepo := storage.NewConcurrentOrderRepository(100)
+	userRepo := memory.NewUserRepository()
+	// orderRepo := storage.NewConcurrentOrderRepository(100)
 
-	userService := services.NewUserService(userRepo, nil)
-	orderService := services.NewConcurrentOrderService(orderRepo, 5)
+	// userService := services.NewUserService(userRepo, nil)
+	// orderService := services.NewConcurrentOrderService(orderRepo, 5)
 
 	// Crear router
 	router := gin.Default()
@@ -58,12 +58,12 @@ func main() {
 	api.Use(middlewares.AuthMiddleware()) // Middleware de auth
 	{
 		// Users
-		userHandler := handlers.NewUserHandler(userService)
+		userHandler := handlers.NewUserHandler(userRepo)
 		userHandler.RegisterRoutes(api)
 
 		// Orders
-		orderHandler := handlers.NewOrderHandler(orderService)
-		orderHandler.RegisterRoutes(api)
+		// orderHandler := handlers.NewOrderHandler(orderService)
+		// orderHandler.RegisterRoutes(api)
 	}
 
 	// Servir documentación

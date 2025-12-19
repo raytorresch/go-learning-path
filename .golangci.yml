@@ -1,0 +1,18 @@
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosec          # seguridad
+    - goconst
+    - gocyclo        # complejidad ciclomática
+    - dupl
+    - gofmt
+    - goimports
+    
+issues:
+  max-issues: 0      # Cero tolerancia
+  exclude-use-default: false

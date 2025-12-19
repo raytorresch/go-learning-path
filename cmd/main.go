@@ -14,18 +14,18 @@ import (
 
 func main() {
 	// init deps
-	userRepo := storage.NewMemoryUserRepository()
-	taskRepo := storage.NewMemoryTaskRepository()
+	// userRepo := storage.NewMemoryUserRepository()
+	// taskRepo := storage.NewMemoryTaskRepository()
 
-	userService := services.NewUserService(userRepo, taskRepo)
+	// userService := services.NewUserService(userRepo, taskRepo)
 
-	user, err := userService.RegisterUser("Juan", "juan@test.com", 30)
-	if err != nil {
-		panic(err)
-	}
+	// user, err := userService.RegisterUser("Juan", "juan@test.com", 30)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	fmt.Printf("Usuario creado: %s\n", user.Name)
-	fmt.Printf("Email: %s\n", user.Email())
+	// fmt.Printf("Usuario creado: %s\n", user.Name)
+	// fmt.Printf("Email: %s\n", user.Email())
 
 	//concurrencia
 	concurrency()
