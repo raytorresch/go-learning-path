@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"user-management/internal/application/services"
 	"user-management/internal/infrastructure/http/handlers"
 	"user-management/internal/infrastructure/middlewares"
 	"user-management/internal/infrastructure/persistence/memory"
@@ -22,7 +23,7 @@ func main() {
 	userRepo := memory.NewUserRepository()
 	// orderRepo := storage.NewConcurrentOrderRepository(100)
 
-	// userService := services.NewUserService(userRepo, nil)
+	userService := services.NewUserService(userRepo)
 	// orderService := services.NewConcurrentOrderService(orderRepo, 5)
 
 	// Crear router
@@ -45,6 +46,8 @@ func main() {
 
 		c.Next()
 	})
+	router.Use(gin.Recovery())
+	router.Use(gin.Logger())
 
 	// Rutas públicas
 	public := router.Group("/api/v1")
@@ -58,7 +61,7 @@ func main() {
 	api.Use(middlewares.AuthMiddleware()) // Middleware de auth
 	{
 		// Users
-		userHandler := handlers.NewUserHandler(userRepo)
+		userHandler := handlers.NewUserHandler(userService)
 		userHandler.RegisterRoutes(api)
 
 		// Orders

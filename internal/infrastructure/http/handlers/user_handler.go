@@ -1,26 +1,28 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 
+	"user-management/internal/application/services"
 	"user-management/internal/domain/entities"
-	"user-management/internal/domain/ports/output"
 )
 
 type UserHandler struct {
-	userPort output.UserPort
-	validate *validator.Validate
+	userService *services.UserService
+	validate    *validator.Validate
 }
 
-func NewUserHandler(userPort output.UserPort) *UserHandler {
+func NewUserHandler(userService *services.UserService) *UserHandler {
 	return &UserHandler{
-		userPort: userPort,
-		validate: validator.New(),
+		userService: userService,
+		validate:    validator.New(),
 	}
 }
 
@@ -58,7 +60,22 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user := h.userPort.Create(c.Request.Context(), req.Name, req.Email, req.Age, req.Password)
+	user, err := h.userService.CreateUser(c.Request.Context(), req.Name, req.Email, req.Age, req.Password)
+	if err != nil {
+		if errors.Is(err, services.ErrEmailAlreadyExists) {
+			ErrorResponse(c, http.StatusConflict, err)
+			return
+		}
+
+		if strings.Contains(err.Error(), "invalid") ||
+			strings.Contains(err.Error(), "must be") ||
+			strings.Contains(err.Error(), "required") {
+			ErrorResponse(c, http.StatusBadRequest, err)
+			return
+		}
+		ErrorResponse(c, http.StatusInternalServerError, err)
+		return
+	}
 
 	c.JSON(http.StatusCreated, Response{
 		Success: true,
@@ -76,7 +93,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userPort.FindByID(c.Request.Context(), id)
+	user, err := h.userService.GetUserByID(c.Request.Context(), id)
 	if err != nil {
 		ErrorResponse(c, http.StatusNotFound, err)
 		return
@@ -96,7 +113,7 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	offset, _ := strconv.Atoi(offsetStr)
 
 	// Filtrar usuarios (simplificado)
-	users, _ := h.userPort.GetAllUsers(c.Request.Context())
+	users, _ := h.userService.GetAllUsers(c.Request.Context())
 
 	// Paginación básica
 	start := offset

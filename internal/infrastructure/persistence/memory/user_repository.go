@@ -26,18 +26,13 @@ func NewUserRepository() *UserRepository {
 }
 
 // Create implements output.UserPort.
-func (u *UserRepository) Create(ctx context.Context, name string, email string, age int, password string) error {
+func (u *UserRepository) Create(ctx context.Context, user entities.User) error {
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
 
-	user, err := entities.NewUser(name, email, age, password)
-	if err != nil {
-		return fmt.Errorf("failed to create user: %w", err)
-	}
-
 	user.ID = uuid.New()
 
-	users[int(user.ID.ID())] = user
+	users[int(user.ID.ID())] = &user
 	return nil
 }
 

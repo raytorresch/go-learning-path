@@ -1,3 +1,12 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
 linters:
   enable:
     - errcheck
@@ -6,13 +15,60 @@ linters:
     - ineffassign
     - staticcheck
     - unused
-    - gosec          # seguridad
+    - gosec
     - goconst
-    - gocyclo        # complejidad ciclomática
+    - gocyclo
     - dupl
     - gofmt
     - goimports
-    
+    - typecheck
+    - bodyclose
+    - exportloopref
+    - gocritic
+    - misspell
+    - nakedret
+    - prealloc
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - whitespace
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15  # Aumentar umbral para proyectos grandes
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - performance
+      - style
+    disabled-checks:
+      - hugeParam
+
 issues:
-  max-issues: 0      # Cero tolerancia
+  max-issues: 0
   exclude-use-default: false
+  
+  # Excluir algunos errores comunes
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - gocyclo
+        - funlen
+    
+    # Excluir errores de "exported" en tests
+    - path: _test\.go
+      text: "exported.*should have comment"
+      linters:
+        - revive
+    
+    # Excluir errores de "Error" en tests
+    - path: _test\.go
+      text: "Error.*should not be capitalized"
+      linters:
+        - revive
