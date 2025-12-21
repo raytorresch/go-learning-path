@@ -1,9 +1,11 @@
 run:
   timeout: 5m
   modules-download-mode: readonly
+  skip-dirs:
+    -archive
 
 output:
-  format: colored-line-number
+  formats: colored-line-number
   print-issued-lines: true
   print-linter-name: true
 
@@ -50,6 +52,8 @@ linters-settings:
       - hugeParam
 
 issues:
+  exclude-dirs:
+    - archive
   max-issues: 0
   exclude-use-default: false
   

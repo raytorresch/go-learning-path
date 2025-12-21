@@ -19,14 +19,14 @@ type UserRepository struct {
 var users = map[int]*entities.User{}
 
 // Garantiza que UserRepository cumple con la interfaz
-var _ output.UserPort = (*UserRepository)(nil)
+var _ output.UserRepository = (*UserRepository)(nil)
 
 func NewUserRepository() *UserRepository {
 	return &UserRepository{}
 }
 
 // Create implements output.UserPort.
-func (u *UserRepository) Create(ctx context.Context, user entities.User) error {
+func (u *UserRepository) Save(ctx context.Context, user entities.User) error {
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
 

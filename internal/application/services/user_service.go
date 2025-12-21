@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"user-management/internal/domain/entities"
+	"user-management/internal/domain/ports/input"
 	"user-management/internal/domain/ports/output"
 
 	"github.com/google/uuid"
@@ -14,14 +15,16 @@ var (
 )
 
 type UserService struct {
-	repo output.UserPort
+	repo output.UserRepository
 }
 
-func NewUserService(repo output.UserPort) *UserService {
+var _ input.UserService = (*UserService)(nil)
+
+func NewUserService(repo output.UserRepository) input.UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, name string, email string, age int, password string) (*entities.User, error) {
+func (s *UserService) RegisterUser(ctx context.Context, name string, email string, age int, password string) (*entities.User, error) {
 	// 1. Crear usuario en dominio
 	user, err := entities.NewUser(name, email, age, password)
 	if err != nil {
@@ -35,14 +38,14 @@ func (s *UserService) CreateUser(ctx context.Context, name string, email string,
 	}
 
 	// 3. Persistir
-	if err := s.repo.Create(ctx, *user); err != nil {
+	if err := s.repo.Save(ctx, *user); err != nil {
 		return nil, err
 	}
 
 	return user, nil
 }
 
-func (s *UserService) GetUserByID(ctx context.Context, id uuid.UUID) (*entities.User, error) {
+func (s *UserService) GetUserProfile(ctx context.Context, id uuid.UUID) (*entities.User, error) {
 
 	return s.repo.FindByID(ctx, id)
 }
@@ -51,7 +54,7 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*entities.User, error)
 	return s.repo.GetAllUsers(ctx)
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, user *entities.User) error {
+func (s *UserService) UpdateProfile(ctx context.Context, user *entities.User) error {
 	return s.repo.Update(ctx, user)
 }
 

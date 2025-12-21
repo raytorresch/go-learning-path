@@ -8,7 +8,7 @@ import (
 
 	"user-management/internal/application/services"
 	"user-management/internal/infrastructure/http/handlers"
-	"user-management/internal/infrastructure/middlewares"
+	"user-management/internal/infrastructure/http/middlewares"
 	"user-management/internal/infrastructure/persistence/memory"
 	// "user-management/internal/infrastructure/storage"
 )

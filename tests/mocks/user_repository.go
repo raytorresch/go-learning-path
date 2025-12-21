@@ -13,10 +13,11 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-var _ output.UserPort = (*MockUserRepository)(nil)
+var _ output.UserRepository = (*MockUserRepository)(nil)
 
-func (m *MockUserRepository) Create(ctx context.Context, user entities.User) error {
+func (m *MockUserRepository) Save(ctx context.Context, user entities.User) error {
 	args := m.Called(ctx, user)
+
 	return args.Error(0)
 }
 

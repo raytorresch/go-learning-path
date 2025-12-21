@@ -12,14 +12,15 @@ import (
 
 	"user-management/internal/application/services"
 	"user-management/internal/domain/entities"
+	"user-management/internal/domain/ports/input"
 )
 
 type UserHandler struct {
-	userService *services.UserService
+	userService input.UserService
 	validate    *validator.Validate
 }
 
-func NewUserHandler(userService *services.UserService) *UserHandler {
+func NewUserHandler(userService input.UserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 		validate:    validator.New(),
@@ -60,7 +61,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.CreateUser(c.Request.Context(), req.Name, req.Email, req.Age, req.Password)
+	user, err := h.userService.RegisterUser(c.Request.Context(), req.Name, req.Email, req.Age, req.Password)
 	if err != nil {
 		if errors.Is(err, services.ErrEmailAlreadyExists) {
 			ErrorResponse(c, http.StatusConflict, err)
@@ -93,7 +94,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.GetUserByID(c.Request.Context(), id)
+	user, err := h.userService.GetUserProfile(c.Request.Context(), id)
 	if err != nil {
 		ErrorResponse(c, http.StatusNotFound, err)
 		return

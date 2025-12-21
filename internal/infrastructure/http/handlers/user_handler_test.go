@@ -43,7 +43,7 @@ func TestUserHandler_CreateUser(t *testing.T) {
 		mockRepo.On("FindByEmail", mock.Anything, "test@example.com").
 			Return((*entities.User)(nil), nil)
 
-		mockRepo.On("Create", mock.Anything, mock.AnythingOfType("entities.User")).
+		mockRepo.On("Save", mock.Anything, mock.AnythingOfType("entities.User")).
 			Run(func(args mock.Arguments) {
 				user := args.Get(1).(entities.User)
 				assert.Equal(t, "test@example.com", user.Email)
