@@ -11,7 +11,13 @@ type Email struct {
 
 var (
 	ErrInvalidEmail = errors.New("invalid email format")
+	isValidEmail    = defaultIsValidEmail
 )
+
+func defaultIsValidEmail(email string) bool {
+	// Importamos utils solo aquí
+	return utils.ValidateEmail(email)
+}
 
 func NewEmail(value string) (Email, error) {
 	// Validación de negocio
@@ -25,7 +31,8 @@ func (e Email) Value() string {
 	return e.value
 }
 
-func isValidEmail(email string) bool {
-	// Implementar lógica de validación de email
-	return utils.ValidateEmail(email)
+func setEmailValidator(fn func(string) bool) func() {
+	original := isValidEmail
+	isValidEmail = fn
+	return func() { isValidEmail = original }
 }
