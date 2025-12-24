@@ -18,7 +18,6 @@ type OrderService struct {
 var _ input.OrderService = (*OrderService)(nil)
 
 func NewOrderService(repo output.OrderRepository, worker output.OrderWorker) input.OrderService {
-	worker.Start(context.Background())
 	return &OrderService{repo: repo, worker: worker}
 }
 
