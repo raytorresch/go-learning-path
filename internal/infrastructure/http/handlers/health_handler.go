@@ -1,14 +1,12 @@
 package handlers
 
 import (
-	// "net/http"
 	"runtime"
 
 	"github.com/gin-gonic/gin"
 )
 
 type HealthHandler struct {
-	// Podría incluir dependencias (DB, cache, etc.)
 }
 
 func NewHealthHandler() *HealthHandler {

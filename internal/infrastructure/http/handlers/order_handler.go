@@ -10,14 +10,15 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"user-management/internal/domain/entities"
-	"user-management/internal/infrastructure/services"
+	"user-management/internal/domain/ports/input"
+	"user-management/internal/domain/valueobjects"
 )
 
 type OrderHandler struct {
-	orderService *services.ConcurrentOrderService
+	orderService input.OrderService
 }
 
-func NewOrderHandler(orderService *services.ConcurrentOrderService) *OrderHandler {
+func NewOrderHandler(orderService input.OrderService) *OrderHandler {
 	return &OrderHandler{
 		orderService: orderService,
 	}
@@ -25,7 +26,6 @@ func NewOrderHandler(orderService *services.ConcurrentOrderService) *OrderHandle
 
 func (h *OrderHandler) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/orders", h.CreateOrder)
-	router.POST("/orders/batch", h.CreateOrderBatch)
 	router.GET("/orders/:id", h.GetOrder)
 	router.GET("/orders", h.ListOrders)
 	router.POST("/orders/:id/cancel", h.CancelOrder)
@@ -43,7 +43,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 
 	// Simular creación
 	order.ID = 1
-	order.Status = entities.OrderStatus(entities.StatusProcessing)
+	order.Status = valueobjects.OrderStatus(entities.StatusProcessing)
 
 	// Procesar concurrentemente
 	go func(o entities.Order) {
@@ -55,31 +55,6 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		Success: true,
 		Data:    order,
 		Message: "Order processing started",
-	})
-}
-
-// CreateOrderBatch - Procesamiento por lotes
-func (h *OrderHandler) CreateOrderBatch(c *gin.Context) {
-	var orders []*entities.Order
-
-	if err := c.ShouldBindJSON(&orders); err != nil {
-		ErrorResponse(c, http.StatusBadRequest, err)
-		return
-	}
-
-	// Limitar batch size
-	if len(orders) > 100 {
-		ErrorResponse(c, http.StatusBadRequest,
-			fmt.Errorf("batch too large, max 100 orders"))
-		return
-	}
-
-	// Procesar concurrentemente
-	results := h.orderService.ProcessBatch(orders)
-
-	SuccessResponse(c, gin.H{
-		"processed": len(results),
-		"orders":    results,
 	})
 }
 
@@ -97,7 +72,7 @@ func (h *OrderHandler) GetOrder(c *gin.Context) {
 	order := &entities.Order{
 		ID:     id,
 		Total:  99.99,
-		Status: entities.OrderStatus(entities.StatusCompleted),
+		Status: valueobjects.OrderStatus(entities.StatusCompleted),
 	}
 
 	SuccessResponse(c, order)
@@ -118,7 +93,7 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 		orders = append(orders, entities.Order{
 			ID:     orderID,
 			Total:  float64(20 * orderID),
-			Status: entities.OrderStatus(entities.StatusCompleted),
+			Status: valueobjects.OrderStatus(entities.StatusCompleted),
 		})
 	}
 
@@ -142,7 +117,7 @@ func (h *OrderHandler) CancelOrder(c *gin.Context) {
 	// Simular cancelación
 	order := &entities.Order{
 		ID:     id,
-		Status: entities.OrderStatus(entities.StatusCancelled),
+		Status: valueobjects.OrderStatus(entities.StatusCancelled),
 	}
 
 	SuccessResponse(c, gin.H{
