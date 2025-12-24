@@ -24,7 +24,7 @@ func NewUserService(repo output.UserRepository) input.UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) RegisterUser(ctx context.Context, name string, email string, age int, password string) (*entities.User, error) {
+func (s *UserService) RegisterUser(ctx context.Context, name, email string, age int, password string) (*entities.User, error) {
 	existing, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
 		return nil, err

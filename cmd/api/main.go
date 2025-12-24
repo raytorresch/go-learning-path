@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -10,6 +11,7 @@ import (
 	"user-management/internal/infrastructure/http/handlers"
 	"user-management/internal/infrastructure/http/middlewares"
 	"user-management/internal/infrastructure/persistence/memory"
+	"user-management/internal/infrastructure/workers"
 	// "user-management/internal/infrastructure/storage"
 )
 
@@ -21,10 +23,14 @@ func main() {
 
 	// Inicializar dependencias
 	userRepo := memory.NewUserRepository()
-	// orderRepo := storage.NewConcurrentOrderRepository(100)
+	orderRepo := memory.NewOrderRepository()
+
+	worker := workers.NewWorkerPool(5, 100)
+	go worker.Start(context.Background())
+	defer worker.Stop(context.Background())
 
 	userService := services.NewUserService(userRepo)
-	// orderService := services.NewConcurrentOrderService(orderRepo, 5)
+	orderService := services.NewOrderService(orderRepo, worker)
 
 	// Crear router
 	router := gin.Default()
@@ -65,8 +71,8 @@ func main() {
 		userHandler.RegisterRoutes(api)
 
 		// Orders
-		// orderHandler := handlers.NewOrderHandler(orderService)
-		// orderHandler.RegisterRoutes(api)
+		orderHandler := handlers.NewOrderHandler(orderService)
+		orderHandler.RegisterRoutes(api)
 	}
 
 	// Servir documentación

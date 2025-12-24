@@ -33,11 +33,6 @@ func (h *UserHandler) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("/users/:id", h.GetUserByID)
 	router.POST("/users", h.CreateUser)
 	router.PUT("/users/:id", h.UpdateUser)
-	// router.DELETE("/users/:id", h.DeleteUser)
-
-	// // Rutas específicas
-	// router.GET("/users/:id/orders", h.GetUserOrders)
-	// router.POST("/users/:id/notify", h.NotifyUser)
 }
 
 // CreateUser demuestra binding y validación
