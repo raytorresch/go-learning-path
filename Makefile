@@ -1,7 +1,23 @@
-#run
-run:
-	go run cmd/main.go
+.PHONY: test lint build test-coverage lint-strict coverage-view
 
-#build ./bin/user-management
+test:
+	go test $(shell go list ./... | grep -v /archive/) -v -coverprofile=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
+
+lint:
+	golangci-lint run ./...
+
+lint-strict:
+	golangci-lint run ./... --timeout=5m
+
 build:
-	go build -o bin/user-management cmd/main.go
+	CGO_ENABLED=0 go build -o bin/api ./cmd/api
+
+test-coverage:
+	go test $(shell go list ./... | grep -v /archive/) -coverprofile=coverage.out -covermode=atomic
+	go tool cover -func=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
+
+coverage-view: test-coverage
+	@echo "Abriendo reporte de cobertura..."
+	open coverage.html || xdg-open coverage.html || echo "Abre manualmente: coverage.html"

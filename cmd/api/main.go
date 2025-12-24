@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
 
-	"user-management/internal/infrastructure/handlers"
-	"user-management/internal/infrastructure/middlewares"
-	"user-management/internal/infrastructure/services"
-	"user-management/internal/infrastructure/storage"
+	"user-management/internal/application/services"
+	"user-management/internal/infrastructure/http/handlers"
+	"user-management/internal/infrastructure/http/middlewares"
+	"user-management/internal/infrastructure/persistence/memory"
+	"user-management/internal/infrastructure/workers"
+	// "user-management/internal/infrastructure/storage"
 )
 
 func main() {
@@ -19,11 +22,15 @@ func main() {
 	}
 
 	// Inicializar dependencias
-	userRepo := storage.NewMemoryUserRepository()
-	orderRepo := storage.NewConcurrentOrderRepository(100)
+	userRepo := memory.NewUserRepository()
+	orderRepo := memory.NewOrderRepository()
 
-	userService := services.NewUserService(userRepo, nil)
-	orderService := services.NewConcurrentOrderService(orderRepo, 5)
+	worker := workers.NewWorkerPool(5, 100)
+	go worker.Start(context.Background())
+	defer worker.Stop(context.Background())
+
+	userService := services.NewUserService(userRepo)
+	orderService := services.NewOrderService(orderRepo, worker)
 
 	// Crear router
 	router := gin.Default()
@@ -45,6 +52,8 @@ func main() {
 
 		c.Next()
 	})
+	router.Use(gin.Recovery())
+	router.Use(gin.Logger())
 
 	// Rutas públicas
 	public := router.Group("/api/v1")
